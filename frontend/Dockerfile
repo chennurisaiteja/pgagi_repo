@@ -1,12 +1,12 @@
 FROM node:18 AS deps
 WORKDIR /app
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm install
 
 FROM node:18 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY frontend .
+COPY . .
 RUN npm run build
 
 FROM node:18 AS runner

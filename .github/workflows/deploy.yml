@@ -1,11 +1,13 @@
-name: Build, Test, and Deploy to AWS ECR
+name: Build, Test, and Deploy to AWS
 
+# ✅ Trigger on both develop and main branches
 on:
   push:
-    branches: [main, develop]
+    branches: [develop, main]
 
 jobs:
   build-test-deploy:
+    name: Build, Test, and Push Docker Images
     runs-on: ubuntu-latest
 
     env:
@@ -14,10 +16,11 @@ jobs:
       ECR_REPO_FRONTEND: ${{ secrets.ECR_REPO_FRONTEND }}
 
     steps:
+      # ✅ Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # ✅ Set up Python and Run Backend Tests
+      # ✅ Python Setup & Backend Unit Tests
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -27,10 +30,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+
       - name: Run backend unit tests
         run: PYTHONPATH=backend pytest backend/tests
 
-      # ✅ Set up Node.js
+      # ✅ Node.js Setup & Frontend Build
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -44,7 +48,7 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      # ✅ Run Cypress with Backend + Frontend
+      # ✅ Cypress E2E tests
       - name: Run Cypress E2E tests
         run: |
           pip install -r backend/requirements.txt
@@ -55,7 +59,8 @@ jobs:
           sleep 10
           cd frontend
           npx cypress run --browser chrome --spec cypress/e2e/frontend_spec.cy.js
-      # ✅ AWS Credentials
+
+      # ✅ Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -63,6 +68,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # ✅ Login to ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
@@ -71,7 +77,24 @@ jobs:
         run: |
           docker build -t $ECR_REPO_BACKEND:latest -f backend/Dockerfile ./backend
           docker push $ECR_REPO_BACKEND:latest
+
       - name: Build and push frontend Docker image
         run: |
           docker build -t $ECR_REPO_FRONTEND:latest -f frontend/Dockerfile ./frontend
           docker push $ECR_REPO_FRONTEND:latest
+
+      # ✅ Terraform Deployment to ECS (backend + frontend)
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./infra
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./infra
+        run: |
+          terraform apply -auto-approve \
+            -var="backend_image=${{ secrets.ECR_REPO_BACKEND }}:latest" \
+            -var="frontend_image=${{ secrets.ECR_REPO_FRONTEND }}:latest"
+

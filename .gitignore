@@ -1,6 +1,9 @@
+node_modules/
+.next/
+.terraform/
 node_modules/\n.next/
 node_modules/
 .next/
 .terraform/
 .terraform/
-.terraform/
+.terraform

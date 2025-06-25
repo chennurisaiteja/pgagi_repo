@@ -1,3 +1,11 @@
+name: Build, Test, and Deploy to AWS ECR
+
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-test-deploy:
 name: Build, Test, and Deploy to AWS
 
 # ✅ Trigger on both develop and main branches
@@ -16,6 +24,10 @@ jobs:
       ECR_REPO_FRONTEND: ${{ secrets.ECR_REPO_FRONTEND }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # ✅ Set up Python and Run Backend Tests
       # ✅ Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
@@ -30,6 +42,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+      - name: Run backend unit tests
+        run: PYTHONPATH=backend pytest backend/tests
+
+      # ✅ Set up Node.js
 
       - name: Run backend unit tests
         run: PYTHONPATH=backend pytest backend/tests
@@ -48,6 +64,7 @@ jobs:
         run: npm run build
         working-directory: frontend
 
+      # ✅ Run Cypress with Backend + Frontend
       # ✅ Cypress E2E tests
       - name: Run Cypress E2E tests
         run: |

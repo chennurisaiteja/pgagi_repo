@@ -1,6 +1,6 @@
 name: Destroy AWS Resources
 
-# 🔁 Run this workflow manually from GitHub UI
+# 🔁 Run this workflow manually from GitHub UI#
 on:
   workflow_dispatch:
 

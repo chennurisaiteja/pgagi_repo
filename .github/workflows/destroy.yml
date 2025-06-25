@@ -42,3 +42,4 @@ jobs:
             -var="backend_image=${{ secrets.ECR_REPO_BACKEND }}" \
             -var="frontend_image=${{ secrets.ECR_REPO_FRONTEND }}"
 
+# updated timestamp

@@ -1,0 +1,45 @@
+name: Destroy AWS Resources
+
+# 🔁 Run this workflow manually from GitHub UI#
+on:
+  workflow_dispatch:
+
+jobs:
+  destroy:
+    name: Destroy Terraform Infrastructure
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      # ✅ 1. Checkout your repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # ✅ 2. Set up AWS credentials using GitHub Secrets
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # ✅ 3. Set up Terraform CLI
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # ✅ 4. Initialize Terraform inside infra/ directory
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init
+
+      # ✅ 5. Destroy infrastructure
+      - name: Terraform Destroy
+        working-directory: infra
+        run: |
+          terraform destroy -auto-approve \
+            -var="backend_image=${{ secrets.ECR_REPO_BACKEND }}" \
+            -var="frontend_image=${{ secrets.ECR_REPO_FRONTEND }}"
+
+# updated timestamp

@@ -1,125 +1,227 @@
-# DevOps Assignment
 
-This project consists of a FastAPI backend and a Next.js frontend that communicates with the backend.
+📦 DevOps Assignment – FastAPI + Next.js Full Stack App
 
-## Project Structure
+This project is a containerized full-stack application with:
 
-```
-.
-├── backend/               # FastAPI backend
-│   ├── app/
-│   │   └── main.py       # Main FastAPI application
-│   └── requirements.txt    # Python dependencies
-└── frontend/              # Next.js frontend
-    ├── pages/
-    │   └── index.js     # Main page
-    ├── public/            # Static files
-    └── package.json       # Node.js dependencies
-```
+🔧 Backend: FastAPI
 
-## Prerequisites
+🎨 Frontend: Next.js
 
-- Python 3.8+
-- Node.js 16+
-- npm or yarn
+☁️ Deployed to AWS ECS (Fargate) using Terraform
 
-## Backend Setup
+🚀 Automated with GitHub Actions CI/CD
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+🛡️ Secure credentials via AWS Secrets Manager
 
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-   ```
+📊 Monitoring with CloudWatch
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+🧪 Load balancing across multiple ECS containers
 
-4. Run the FastAPI server:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
+🗂️  Project Structure
 
-   The backend will be available at `http://localhost:8000`
+    .
+    ├── backend/                               
+    │   └── Dockerfile                          
+    ├── frontend/
+    │   └── Dockerfile
+    ├── infra/
+    │   ├── main.tf (optional)
+    │   ├── vpc.tf
+    │   ├── ecs.tf
+    │   ├── alb.tf
+    │   ├── cloudwatch.tf
+    │   ├── secrets.tf
+    │   ├── iam.tf
+    │   ├── variables.tf
+    │   ├── outputs.tf
+    ├── .github/workflows/
+    │   └── Build, Test, and Deploy to AWS ECR.yml
 
-## Frontend Setup
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
+✅ Task 1 – Run the App Locally (Pre-containerization)
 
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn
-   ```
+Prerequisites
 
-3. Configure the backend URL (if different from default):
-   - Open `.env.local`
-   - Update `NEXT_PUBLIC_API_URL` with your backend URL
-   - Example: `NEXT_PUBLIC_API_URL=https://your-backend-url.com`
+Python 3.11
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+Node.js 18.x
 
-   The frontend will be available at `http://localhost:3000`
+pip, npm
 
-## Changing the Backend URL
+Backend (FastAPI)
 
-To change the backend URL that the frontend connects to:
+cd backend 
 
-1. Open the `.env.local` file in the frontend directory
-2. Update the `NEXT_PUBLIC_API_URL` variable with your new backend URL
-3. Save the file
-4. Restart the Next.js development server for changes to take effect
+python3 -m venv venv 
 
-Example:
-```
-NEXT_PUBLIC_API_URL=https://your-new-backend-url.com
-```
+source venv/bin/activate
 
-## For deployment:
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+pip install -r requirements.txt
 
-   AND
+uvicorn app.main:app --reload --port 8000
 
-   ```bash
-   npm run start
-   # or
-   yarn start
-   ```
+http://localhost:8000/api/health
 
-   The frontend will be available at `http://localhost:3000`
+http://localhost:8000/api/message
 
-## Testing the Integration
+Frontend (Next.js)
 
-1. Ensure both backend and frontend servers are running
-2. Open the frontend in your browser (default: http://localhost:3000)
-3. If everything is working correctly, you should see:
-   - A status message indicating the backend is connected
-   - The message from the backend: "You've successfully integrated the backend!"
-   - The current backend URL being used
+cd frontend
 
-## API Endpoints
+npm install
 
-- `GET /api/health`: Health check endpoint
-  - Returns: `{"status": "healthy", "message": "Backend is running successfully"}`
+npm run dev
 
-- `GET /api/message`: Get the integration message
-  - Returns: `{"message": "You've successfully integrated the backend!"}`
+Visit: http://localhost:3000
+
+✅ Task 2 – Dockerization
+
+Both services are containerized using multi-stage Dockerfiles.
+
+Build and run with Docker Compose (optional local test)
+
+docker-compose up --build
+
+✅ Task 3 – CI/CD with GitHub Actions
+
+CI/CD Flow
+
+Trigger: On push to develop or main
+
+Steps:
+
+Checkout code
+
+Run backend unit tests with Pytest
+
+Run frontend E2E tests with Cypress
+
+Build Docker images
+
+Push to AWS ECR
+
+Deploy to ECS 
+
+File: .github/workflows/deploy.yml
+
+Secrets Required:
+
+AWS_ACCESS_KEY_ID
+
+AWS_SECRET_ACCESS_KEY
+
+AWS_REGION
+
+ECR_REPO_BACKEND
+
+ECR_REPO_FRONTEND
+
+✅ Task 4 – Infrastructure as Code (Terraform)
+
+AWS Resources Provisioned:
+
+VPC, Subnets
+
+Security Groups
+
+ECS Cluster (Fargate)
+
+ECS Services + Task Definitions
+
+ALB + Target Groups + Listeners
+
+Secrets Manager
+
+IAM roles with least privilege
+
+Step-by-Step:
+
+cd infra
+
+terraform init
+
+terraform plan
+
+terraform apply -auto-approve
+
+✅ Output: alb_dns_name – copy this to access the app.
+
+✅ Task 5 – Monitoring & Alerting
+
+📈 CloudWatch
+Metrics collected:
+
+CPU utilization
+
+Memory usage
+
+ALB request count
+
+🔔 Alarms:
+Configured CloudWatch alarm for:
+
+High CPU > 70% for 5 minutes
+
+Notification sent to email via SNS Topic
+
+✅ Task 6 – Security Best Practices
+
+🔐 IAM
+
+ECS Task uses least-privilege IAM role
+
+Allows:
+
+Only necessary ECR actions
+
+Logging to CloudWatch
+
+Reading a specific secret from Secrets Manager
+
+🔐 AWS Secrets Manager
+
+Credentials (username, password, host) stored securely
+
+Fetched into ECS task at runtime via secrets block in task definition
+
+🔒 Network Restrictions
+
+Security Group:
+
+Ingress: TCP 8000 (backend), 3000 (frontend), only via ALB
+
+Egress: All
+
+✅ Task 7 – Load Balancing Validation
+
+ECS Service Scaling
+
+Both backend and frontend ECS services use:
+
+desired_count = 2
+
+Fargate tasks behind an Application Load Balancer
+
+Validation:
+
+Verified in Target Groups: 2 healthy tasks
+
+Accessed endpoint:
+
+curl http://<alb_dns_name>:8000/api/health
+Stopped one task manually
+
+Re-ran curl — traffic still served from remaining task
+
+🎯 Load balancing works as expected!
+
+📎 Cleanup
+
+To destroy infrastructure:
+
+terraform destroy -auto-approve
+
+Ensure terraform.tfstate is not in .gitignore when applying/destroying.
+
+
+

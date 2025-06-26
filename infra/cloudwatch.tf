@@ -9,7 +9,7 @@ resource "aws_sns_topic" "alert_topic" {
 resource "aws_sns_topic_subscription" "email" {
   topic_arn = aws_sns_topic.alert_topic.arn
   protocol  = "email"
-  endpoint  = "awschsaiteja@gmail.com"  # 🔁 REPLACED with your actual email
+  endpoint  = "awschsaiteja@gmail.com" # 🔁 REPLACED with your actual email
 }
 
 # ------------------------------
@@ -21,7 +21,7 @@ resource "aws_cloudwatch_metric_alarm" "backend_high_cpu" {
   evaluation_periods  = 1
   metric_name         = "CPUUtilization"
   namespace           = "AWS/ECS"
-  period              = 300  # 5 minutes
+  period              = 300 # 5 minutes
   statistic           = "Average"
   threshold           = 70
   alarm_description   = "Triggered when ECS backend CPU > 70% for 5 minutes"

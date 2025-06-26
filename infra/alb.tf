@@ -17,7 +17,7 @@ resource "aws_lb_target_group" "backend_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/api/health"   # Health check on backend
+    path                = "/api/health" # Health check on backend
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30
@@ -38,7 +38,7 @@ resource "aws_lb_target_group" "frontend_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/"            # Health check on frontend root
+    path                = "/" # Health check on frontend root
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30

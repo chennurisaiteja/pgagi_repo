@@ -1,4 +1,5 @@
 
+
 📦 DevOps Assignment – FastAPI + Next.js Full Stack App
 
 This project is a containerized full-stack application with:
